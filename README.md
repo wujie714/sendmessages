@@ -85,22 +85,22 @@ The Plugin of dify-on-wechat
   "mygis_stop_reply": true,  //默认情况是否回复
   "mygis_sleep_minsecond": 0, //批量群发数据时 时间最小间隔
   "mygis_sleep_maxsecond": 1, //批量群发数据时 时间最大间隔
-  "mygis_friends_whitelist": ["吴杰.九鼎图业"],  //朋友白名单
-  "mygis_groups_whitelist": ["吴杰共享群"], //群白名单
+  "mygis_friends_whitelist": ["opengis文强"],  //朋友白名单
+  "mygis_groups_whitelist": ["opengis社区"], //群白名单
   "single_chat_noreply_prefix": ["收到", "好的","再见","是的","ok","OK","1"], //单聊不回复关键字
   "accept_friend_commands": ["加好友","我是","boss","求职","应聘","java","python","人工智能","数据处理"], //接受朋友关键字
   "accept_friend_msg": "很高兴认识您",//接受朋友的回复
   "response": {
-    "公司资料、公司介绍、公司简介":"./docs/file/mygis.pdf",
+    "公司资料、公司介绍、公司简介":"./plugins/sendmessages/docs/file/mygis.pdf",
     "公司网站":"http://www.mapyeah.com/",
-    "公司公众号": "./docs/file/qrcode_for_mygis.jpg",
-    "打赏": "./docs/file/pay.jpg",
+    "公司公众号": "./plugins/sendmessages/docs/file/qrcode_for_mygis.jpg",
+    "打赏": "./plugins/sendmessages/docs/file/pay.jpg",
     "入群、进群": "opengis社区"
   },
   "instrution":{
-      "公司资料": ["./docs/file/mygis.pdf","./docs/file/mygis.pdf"],// 相对于 dify-on-wechat的根目录,支持:http/https
-      "公司公众号":["九鼎图业 公众号，请关注","./docs/file/qrcode_for_mygis.jpg"],
-      "opengis公众号":["新推出 opengis 公众号，请关注","./docs/file/qrcode_for_opengis.jpg"]     //逐条发送
+      "公司资料": ["./plugins/sendmessages/docs/file/mygis.pdf","./plugins/sendmessages/docs/file/mygis.pdf"],// 相对于 dify-on-wechat的根目录,支持:http/https
+      "公司公众号":["九鼎图业 公众号，请关注","./plugins/sendmessages/docs/file/qrcode_for_mygis.jpg"],
+      "opengis公众号":["新推出 opengis 公众号，请关注","./plugins/sendmessages/docs/file/qrcode_for_opengis.jpg"]     //逐条发送
    }
 }
 

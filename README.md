@@ -1,7 +1,7 @@
 # sendmessags
 The Plugin of dify-on-wechat
 #配置
-##修改 dify-on-wechat的plugin目录下的 plugins.json，加入：sendmessages 插件
+##修改 dify-on-wechat的plugin目录下的 plugins.json，加入：sendmessages 插件,优先级 设置 在 Godcmd 之后
 '''
 {
     "plugins": {
@@ -20,6 +20,10 @@ The Plugin of dify-on-wechat
         "Godcmd": {
             "enabled": true,
             "priority": 999
+        },
+        "sendmessages": {
+            "enabled": true,
+            "priority": 998
         },
         "Keyword": {
             "enabled": true,
@@ -43,10 +47,6 @@ The Plugin of dify-on-wechat
         },
         "timetask": {
             "enabled": false,
-            "priority": 8
-        },
-        "sendmessages": {
-            "enabled": true,
             "priority": 8
         },
         "Hello": {
@@ -73,10 +73,6 @@ The Plugin of dify-on-wechat
             "enabled": false,
             "priority": 0
         },
-        "SendMessages": {
-            "enabled": true,
-            "priority": -999
-        },
         "Finish": {
             "enabled": true,
             "priority": -999
@@ -102,7 +98,7 @@ The Plugin of dify-on-wechat
     "入群、进群": "opengis社区"
   },
   "instrution":{
-      "公司资料": ["./docs/file/mygis.pdf","./docs/file/mygis.pdf"],
+      "公司资料": ["./docs/file/mygis.pdf","./docs/file/mygis.pdf"],// 相对于 dify-on-wechat的根目录,支持:http/https
       "公司公众号":["九鼎图业 公众号，请关注","./docs/file/qrcode_for_mygis.jpg"],
       "opengis公众号":["新推出 opengis 公众号，请关注","./docs/file/qrcode_for_opengis.jpg"]     //逐条发送
    }

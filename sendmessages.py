@@ -19,8 +19,8 @@ class sendType(Enum):
     WHITELIST = "白名单"  # 图片消息
 
 @plugins.register(
-    name="SendMessages",
-    desire_priority=-999,
+    name="sendmessages",
+    desire_priority=998,
     hidden=True,
     desc="A plugin that check unknown command",
     version="1.0",
@@ -243,8 +243,11 @@ class SendMessages(Plugin):
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS
                 return
-
-        if self.bIsStopReply==True:
+            
+        if content.startswith("#"):
+           e_context.action = EventAction.BREAK  # 事件结束，并跳过处理context的默认逻辑
+            
+        elif self.bIsStopReply==True:
             logger.info("系统目前 停止 回复中...")
             # 停止回复
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑

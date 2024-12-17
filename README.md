@@ -85,6 +85,7 @@ The Plugin of dify-on-wechat
   "mygis_stop_reply": true,  //默认情况是否回复
   "mygis_sleep_minsecond": 0, //批量群发数据时 时间最小间隔
   "mygis_sleep_maxsecond": 1, //批量群发数据时 时间最大间隔
+
   "mygis_friends_whitelist": ["opengis文强"],  //朋友白名单
   "mygis_groups_whitelist": ["opengis社区"], //群白名单
   "single_chat_noreply_prefix": ["收到", "好的","再见","是的","ok","OK","1"], //单聊不回复关键字

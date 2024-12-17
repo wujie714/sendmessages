@@ -1,0 +1,22 @@
+{
+  "mygis_stop_reply": true,
+  "mygis_sleep_minsecond": 0,
+  "mygis_sleep_maxsecond": 1,
+  "mygis_friends_whitelist": ["吴杰.九鼎图业"],
+  "mygis_groups_whitelist": ["吴杰共享群"],
+  "single_chat_noreply_prefix": ["收到", "好的","再见","是的","ok","OK","1"],
+  "accept_friend_commands": ["加好友","我是","boss","求职","应聘","java","python","人工智能","数据处理"],
+  "accept_friend_msg": "很高兴认识您",
+  "response": {
+    "公司资料、公司介绍、公司简介":"./docs/file/mygis.pdf",
+    "公司网站":"http://www.mapyeah.com/",
+    "公司公众号": "./docs/file/qrcode_for_mygis.jpg",
+    "打赏": "./docs/file/pay.jpg",
+    "入群、进群": "opengis社区"
+  },
+  "instrution":{
+      "资料": ["./docs/file/mygis.pdf","./docs/file/mygis.pdf"],
+      "公司公众号":["九鼎图业 公众号，请关注","./docs/file/qrcode_for_mygis.jpg"],
+      "opengis公众号":["新推出 opengis 公众号，请关注","./docs/file/qrcode_for_opengis.jpg"]
+   }
+}

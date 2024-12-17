@@ -1,2 +1,2 @@
 # sendmessags
-The Plugindify-on-wechat
+The Plugin of dify-on-wechat

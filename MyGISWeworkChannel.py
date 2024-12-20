@@ -14,6 +14,17 @@ class MyGISWeworkChannel(ChatChannel):
         # super().__init__()
         from channel.wework.wework_channel import WeworkChannel
         self.channel = WeworkChannel
+
+    def getUserNameByNickName(self,NickName):
+        contacts = self.get_contacts()
+        for contact in contacts:
+            logger.info("contact:{}".format(contact))
+            # 属性没有验证是否对
+            if contact["NickName"] == NickName:
+                return contact["conversation_id"]
+
+        return None
+
     def sendAllFriends(self,content,all=False):
         contacts=self.get_contacts()
         iNum=0

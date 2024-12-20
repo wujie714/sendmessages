@@ -1,4 +1,5 @@
 # encoding:utf-8
+import json
 
 import plugins
 from bridge.context import ContextType
@@ -17,9 +18,9 @@ class sendType(Enum):
     ALL = "所有"  # 文本消息
     OWNER = "群主"  # 音频消息
     WHITELIST = "白名单"  # 图片消息
-
+_mygis_name = "sendmessages"
 @plugins.register(
-    name="sendmessages",
+    name=_mygis_name,
     desire_priority=998,
     hidden=True,
     desc="A plugin that check unknown command",
@@ -41,8 +42,7 @@ class SendMessages(Plugin):
     instrution=None
 
     bIsStopReply =False
-
-    bIsNoReply =False
+    users={}
 
     def __init__(self):
         super().__init__()
@@ -78,7 +78,7 @@ class SendMessages(Plugin):
         try:
             self.conf = super().load_config()
 
-            self.trigger_prefix = conf().get("plugin_trigger_prefix", "$") + "sendmessages"
+            self.trigger_prefix = conf().get("plugin_trigger_prefix", "$") + _mygis_name
 
             if not self.conf:
                 logger.warn("[SendMessages] inited but SendMessages not found in config")
@@ -91,6 +91,31 @@ class SendMessages(Plugin):
         except Exception as e:
             logger.exception(e)
             raise self.handle_error(e, "[SendMessages] init failed, ignore ")
+
+    def getDefaultUserConf(self):
+        return {"bIsStopReply":True}
+    def getUserConf(self,userName):
+
+        if userName not in self.users.keys():
+            self.users[userName] = self.getDefaultUserConf()
+
+        return  self.users[userName]
+
+    def getUserNames(self,nickNames):
+        userNames=[]
+        try:
+            jsonDatas=json.loads(nickNames)
+            for item in jsonDatas:
+                userName = self.channel.getUserNameByNickName(item)
+                if userName !=None:
+                    userNames.append(userName)
+        except Exception as e:
+            logger.exception(e)
+
+        return userNames
+
+
+
     def updateConfig(self):
         try:
             logger.info("[SendMessages] updateConfig...")
@@ -100,13 +125,15 @@ class SendMessages(Plugin):
             self.mygis_groups_whitelist = self.conf["mygis_groups_whitelist"]
             self.mygis_friends_whitelist = self.conf["mygis_friends_whitelist"]
             self.bIsStopReply = self.conf["mygis_stop_reply"]
+            self.response = self.conf["mygis_response"]
+            self.instrution = self.conf["mygis_instrution"]
+
             self.channel.mygis_sleep_minsecond = self.mygis_sleep_minsecond
             self.channel.mygis_sleep_maxsecond = self.mygis_sleep_maxsecond
             self.channel.mygis_groups_whitelist = self.mygis_groups_whitelist
             self.channel.mygis_friends_whitelist = self.mygis_friends_whitelist
             self.channel.conf=self.conf
-            self.response = self.conf["response"]
-            self.instrution = self.conf["instrution"]
+
 
             logger.info("response:{}".format(self.response))
         except Exception as e:
@@ -149,11 +176,12 @@ class SendMessages(Plugin):
         #
         # # 如果有匹配的关键字，则不回复
         #
-        logger.info("single_chat_noreply_prefix:{}".format(self.conf["single_chat_noreply_prefix"]))
-        if self.check_noreply(content, self.conf["single_chat_noreply_prefix"]) is True:
-            logger.warning(" sendmessages 不需要回复的关键字...{}".format(self.conf["single_chat_noreply_prefix"]))
+        logger.info("mygis_single_chat_noreply_prefix:{}".format(self.conf["mygis_single_chat_noreply_prefix"]))
+        if self.check_noreply(content, self.conf["mygis_single_chat_noreply_prefix"]) is True:
+            logger.warning(" sendmessages 不需要回复的关键字...{}".format(self.conf["mygis_single_chat_noreply_prefix"]))
             e_context.action = EventAction.BREAK_PASS
             return
+
 
 
         trigger_prefix = self.trigger_prefix
@@ -162,11 +190,15 @@ class SendMessages(Plugin):
         for key in result.keys():
             if content in key:
                 if "群" in content:
-                    room = result[key]
-                    self.channel.add_member_into_chatroom(roomname=room, UserName=user)
+                    rooms = result[key]
+                    for room in rooms:
+                        self.channel.add_member_into_chatroom(roomname=room, UserName=user)
                 else:
                     logger.info("{} 包含关键字:{}".format(key,content))
-                    self.channel.send_rawmsg(content=result[key],to_user_name=user)
+                    datas = result[key]
+                    for data in datas:
+                        self.channel.send_rawmsg(content=data,to_user_name=user)
+
                 e_context.action = EventAction.BREAK_PASS
                 return
         if content.startswith(trigger_prefix):
@@ -184,23 +216,53 @@ class SendMessages(Plugin):
                 return
             elif len(args)==0 or  not self.check_contain(args[0],adminList):
                 info = self.get_help_text()
-                reply.type = ReplyType.ERROR
+                reply.type = ReplyType.INFO
                 reply.content = info
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
                 return
 
             if args[0] == "停止回复":
-                self.bIsStopReply =True
+
+                info = "设置 所有人 停止回复 ...成功!"
+                if len(args) == 1:
+                    self.bIsStopReply =True
+                else:
+                    UserNames = self.getUserNames(args[1])
+                    if len(UserNames) == 0:
+                        info = "请检查 {} 的数据格式!".format(args[1])
+                    else:
+                        info = "设置 {} 停止回复 ...成功!".format(args[1])
+
+                    for userName in UserNames:
+                        conf = self.getUserConf(userName)
+                        conf["bIsStopReply"] = True
+
                 reply.type = ReplyType.INFO
-                reply.content = "停止回复 ...成功!"
+                reply.content = info
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
                 return
             if args[0] == "开始回复":
-                self.bIsStopReply =False
+                info ="设置 所有人 开始回复 ...成功!"
+                if len(args)==1:
+                    self.bIsStopReply = False
+                else:
+
+                    UserNames = self.getUserNames(args[1])
+                    if len(UserNames)==0:
+                        info = "请检查 {} 的数据格式!".format(args[1])
+                    else:
+                        info = "设置 {} 开始回复 ...成功!".format(args[1])
+
+                    for userName in UserNames:
+                        logger.info("userName:{}".format(userName))
+                        conf = self.getUserConf(userName)
+                        logger.info("conf:{},users:{}".format(conf,self.users))
+                        conf["bIsStopReply"] = False
+
                 reply.type = ReplyType.INFO
-                reply.content = "开始回复 ...成功!"
+                reply.content = info
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
                 return
@@ -243,25 +305,52 @@ class SendMessages(Plugin):
                 e_context["reply"] = reply
                 e_context.action = EventAction.BREAK_PASS
                 return
-            
+
+        # 转人工 ，用户可以确定如何回复
+        if content == "转人工":
+            conf = self.getUserConf(user)
+            conf["bIsStopReply"] = True
+            reply = Reply()
+            reply.type = ReplyType.INFO
+            reply.content = "转人工...请稍等"
+            e_context["reply"] = reply
+            e_context.action = EventAction.BREAK_PASS
+            return
+
+        logger.info("users:{}".format(self.users))
         if content.startswith("#"):
            e_context.action = EventAction.BREAK  # 事件结束，并跳过处理context的默认逻辑
-            
-        elif self.bIsStopReply==True:
+        elif user in self.users.keys():
+            # 个人的设置优先级 比 全局 设置优先级高
+           conf= self.users[user]
+           if conf["bIsStopReply"] == True:
+               e_context.action = EventAction.BREAK_PASS
+           else:
+               e_context.action = EventAction.BREAK
+
+        elif self.bIsStopReply == True:
             logger.info("系统目前 停止 回复中...")
             # 停止回复
             e_context.action = EventAction.BREAK_PASS  # 事件结束，并跳过处理context的默认逻辑
+        else:
+            e_context.action = EventAction.BREAK
+
 
 
     def get_help_text(self, **kwargs):
         msg ="用法:\n"
-        msg += "{} 开始回复\n".format(self.trigger_prefix)
-        msg += "{} 停止回复\n".format(self.trigger_prefix)
+        msg += "{} 开始回复 [\"某人\"] #可选,默认为全体\n".format(self.trigger_prefix)
+        msg += "{} 停止回复 [\"某人\"] #可选,默认为全体\n".format(self.trigger_prefix)
         msg += "{} 组群发 [所有/群主/白名单] [指令/msg]\n".format(self.trigger_prefix)
         msg += "{} 好友群发 [所有/白名单] [指令/msg]\n".format(self.trigger_prefix)
         msg += "指令包括:\n"
         for key in self.instrution:
-            msg += "{} \n".format(key)
+            msg += "{} \n--回复内容:{}\n".format(key,self.instrution[key])
+
+
+        msg += "\n关键字回复:\n"
+        for key in self.response:
+            msg += "{} \n--回复内容:{} \n".format(key,self.response[key])
 
 
         return msg

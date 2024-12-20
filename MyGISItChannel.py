@@ -25,6 +25,16 @@ class MyGISItChannel(ChatChannel):
         # super().__init__()
         from lib import itchat
         self.pItchat =itchat
+
+    def getUserNameByNickName(self,NickName):
+        friends=self.pItchat.get_friends(update=True)
+        for friend in friends:
+            logger.info("friend:{}".format(friend))
+            if NickName==friend["NickName"]:
+                logger.info("friend:{}".format(friend))
+                return friend["UserName"]
+        return None
+
     def add_member_into_chatroom(self, roomname,UserName):
         chatrooms = self.pItchat.get_chatrooms(update=True)
         logger.info("room name:{}".format(roomname))
@@ -32,6 +42,8 @@ class MyGISItChannel(ChatChannel):
             if chatroom["NickName"] == roomname:
                 logger.info("chatroom:{}".format(chatroom))
                 self.pItchat.add_member_into_chatroom(chatroom["UserName"], UserName)
+                logger.info("add:{}加群成功".format(chatroom))
+                self.send_rawmsg("加入群：{} 成功".format(chatroom),UserName)
                 break
 
         return "no room!"
@@ -142,7 +154,7 @@ class MyGISItChannel(ChatChannel):
     def send_rawmsg(self, content, to_user_name):
         global media_type, content_at
         # 判断消息类型
-        media_type =self.getMessageType()
+        media_type =self.getMessageType(content)
         self.send_msg(msg_type=media_type,content=content,to_user_name=to_user_name)
 
     def send_msg(self, msg_type, content, to_user_name, at_content=None):
@@ -207,13 +219,13 @@ class MyGISItChannel(ChatChannel):
     def _build_friend_request_reply(self, context):
         if isinstance(context.content, dict) and "Content" in context.content:
             logger.info("friend request content: {}".format(context.content["Content"]))
-            logger.info("accept_friend_commands: {}".format(self.conf["accept_friend_commands"]))
+            logger.info("mygis_accept_friend_commands: {}".format(self.conf["mygis_accept_friend_commands"]))
 
             # if context.content["Content"] in conf().get("accept_friend_commands", []):
-            bIsContain = self.check_contain(context.content["Content"], self.conf["accept_friend_commands"])
+            bIsContain = self.check_contain(context.content["Content"], self.conf["mygis_accept_friend_commands"])
             if False:
                 self.pItchat.accept_friend(userName=context.content["UserName"], v4=context.content["Ticket"])
-                self.pItchat.send(self.conf["accept_friend_msg"], toUserName=context.content["UserName"])
+                self.pItchat.send(self.conf["mygis_accept_friend_msg"], toUserName=context.content["UserName"])
                 # self.channel.send(self.conf["mygis_help"], toUserName=context.content["UserName"])
             #
             # logger.info("bIsContain:{}".format(bIsContain))
@@ -234,3 +246,4 @@ class MyGISItChannel(ChatChannel):
             if key.upper() in msg.upper():
                 return True
         return False
+
